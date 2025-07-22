@@ -1,107 +1,306 @@
-# Flamapy MCP - Feature Model Analysis Tools
-
-This repository provides a comprehensive set of Model Control Protocol (MCP) tools for analyzing feature models using the Universal Variability Language (UVL) format. These tools enable developers and researchers to perform various analyses on software product lines and feature models.
+# flamapy-mcp: A Flamapy MCP server
 
 ## Overview
 
-Flamapy MCP offers a collection of automated analysis tools that help you understand and validate feature models. Whether you're working with software product lines, variability modeling, or configuration management, these tools provide essential insights into your feature models.
+A Model Context Protocol server for Flamapy operations. This server provides tools to analyze, validate, and interact with UVL (Universal Variability Language) feature models via Large Language Models.
 
-## Available Tools
+Please note that flamapy-mcp is currently in early development. The functionality and available tools are subject to change and expansion as we continue to develop and improve the server.
 
-### Core Analysis Tools
+### Tools
 
-#### 1. **Configurations**
-- **Purpose**: Generate all possible valid configurations from a feature model
-- **Use Case**: Understanding all possible product variants that can be derived
-- **Input**: UVL feature model content
-- **Output**: List of all valid feature combinations
+1. `atomic_sets`
+   - Identifies atomic sets, which are groups of features that always appear together in all valid configurations.
+   - Input:
+     - `content` (string): UVL (universal variability language) feature model content.
+   - Returns: A list of lists, where each inner list represents an atomic set of features.
 
-#### 2. **Configuration Count**
-- **Purpose**: Get the total number of valid configurations
-- **Use Case**: Quick assessment of model complexity and variant space size
-- **Input**: UVL feature model content
-- **Output**: Numerical count of possible configurations
+2. `average_branching_factor`
+   - Calculates the average number of child features per parent feature, indicating model complexity.
+   - Input:
+     - `content` (string): UVL feature model content.
+   - Returns: The average branching factor as a floating-point number.
 
-#### 3. **Estimated Configuration Count**
-- **Purpose**: Estimate total configurations considering all feature combinations
-- **Use Case**: Performance-friendly approximation for very large models
-- **Input**: UVL feature model content
-- **Output**: Estimated number of configurations
+3. `commonality`
+   - Measures the frequency of a feature in valid configurations, expressed as a percentage.
+   - Inputs:
+     - `content` (string): UVL feature model content.
+     - `config_file` (string): The name of the feature to calculate commonality for.
+   - Returns: The commonality of the specified feature as a float.
 
-### Feature Analysis Tools
+4. `configurations`
+   - Generates all possible valid configurations from the feature model.
+   - Input:
+     - `content` (string): UVL feature model content.
+   - Returns: A list of all valid configurations.
 
-#### 4. **Core Features**
-- **Purpose**: Identify mandatory features present in all configurations
-- **Use Case**: Finding essential components that cannot be excluded
-- **Input**: UVL feature model content
-- **Output**: List of features that appear in every valid configuration
+5. `configurations_number`
+   - Returns the total number of valid configurations for the feature model.
+   - Input:
+     - `content` (string): UVL feature model content.
+   - Returns: The total number of valid configurations as an integer.
 
-#### 5. **Dead Features**
-- **Purpose**: Detect features that cannot be included in any valid configuration
-- **Use Case**: Identifying modeling errors and unreachable features
-- **Input**: UVL feature model content
-- **Output**: List of features that are impossible to select
+6. `conflict_detection`
+   - Identifies conflicting constraints in the feature model. Useful for debugging model consistency.
+   - Input:
+     - `content` (string): UVL feature model content.
+   - Returns: Details about the conflicting constraints found.
 
-#### 6. **False Optional Features**
-- **Purpose**: Find features marked as optional but actually mandatory due to constraints
-- **Use Case**: Detecting inconsistencies in feature model design
-- **Input**: UVL feature model content
-- **Output**: List of seemingly optional but actually required features
+7. `core_features`
+   - Identifies features that are present in all valid configurations (mandatory features).
+   - Input:
+     - `content` (string): UVL feature model content.
+   - Returns: A list of core feature names.
 
-#### 7. **Leaf Features**
-- **Purpose**: Identify features without child features
-- **Use Case**: Finding the most specific options in the product line
-- **Input**: UVL feature model content
-- **Output**: List of leaf-level features
+8. `count_leafs`
+   - Counts the number of leaf features (features with no children) in the model.
+   - Input:
+     - `content` (string): UVL feature model content.
+   - Returns: The number of leaf features as an integer.
 
-#### 8. **Feature Ancestors**
-- **Purpose**: Find all parent features of a specific feature
-- **Use Case**: Understanding feature hierarchy and dependencies
-- **Input**: UVL content + target feature name
-- **Output**: List of ancestor features
+9. `dead_features`
+   - Identifies features that cannot be included in any valid configuration, often indicating model errors.
+   - Input:
+     - `content` (string): UVL feature model content.
+   - Returns: A list of dead feature names.
 
-### Structural Analysis Tools
+10. `diagnosis`
+    - Helps find explanations for an invalid configuration by identifying conflicting constraints.
+    - Input:
+      - `content` (string): UVL feature model content.
+    - Returns: A diagnosis of the issues in the feature model.
 
-#### 9. **Atomic Sets**
-- **Purpose**: Identify groups of features that always appear together
-- **Use Case**: Simplifying models by grouping inseparable features
-- **Input**: UVL feature model content
-- **Output**: Sets of features that behave as single units
+11. `estimated_number_of_configurations`
+    - Estimates the total number of configurations by considering all feature combinations, ignoring constraints.
+    - Input:
+      - `content` (string): UVL feature model content.
+    - Returns: The estimated number of configurations as an integer.
 
-#### 10. **Average Branching Factor**
-- **Purpose**: Calculate average number of children per parent feature
-- **Use Case**: Assessing model complexity and structure balance
-- **Input**: UVL feature model content
-- **Output**: Numerical average of child features per parent
+12. `false_optional_features`
+    - Identifies features that seem optional but are mandatory due to model constraints.
+    - Input:
+      - `content` (string): UVL feature model content.
+    - Returns: A list of false optional feature names.
 
-#### 11. **Maximum Depth**
-- **Purpose**: Find the longest path from root to leaf in the feature tree
-- **Use Case**: Understanding model hierarchy depth
-- **Input**: UVL feature model content
-- **Output**: Maximum depth value
+13. `feature_ancestors`
+    - Returns all ancestor features for a given feature in the model hierarchy.
+    - Inputs:
+      - `content` (string): UVL feature model content.
+      - `config_file` (string): The feature name for which to find ancestors.
+    - Returns: A list of ancestor feature names.
 
-#### 12. **Leaf Count**
-- **Purpose**: Count total number of leaf features
-- **Use Case**: Quick assessment of feature granularity
-- **Input**: UVL feature model content
-- **Output**: Number of leaf features
+14. `feature_inclusion_probability`
+    - Calculates the probability of each feature being included in a random valid configuration.
+    - Input:
+      - `content` (string): UVL feature model content.
+    - Returns: A dictionary mapping each feature to its inclusion probability.
 
-### Validation and Filtering Tools
+15. `filter`
+    - Filters and selects a subset of configurations based on specified criteria.
+    - Inputs:
+      - `content` (string): UVL feature model content.
+      - `config_file` (string): The filtering criteria.
+    - Returns: A list of configurations that match the criteria.
 
-#### 13. **Satisfiability**
-- **Purpose**: Check if the feature model is valid and consistent
-- **Use Case**: Validating model correctness before analysis
-- **Input**: UVL feature model content
-- **Output**: Boolean indicating model validity
+16. `homogeneity`
+    - Measures the similarity of configurations. A higher value (closer to 1) indicates more similar configurations.
+    - Input:
+      - `content` (string): UVL feature model content.
+    - Returns: The homogeneity score as a float.
 
-#### 14. **Commonality**
-- **Purpose**: Measure how often features appear across configurations
-- **Use Case**: Identifying frequently used vs. rare features
-- **Input**: UVL content + configuration parameters
-- **Output**: Percentage frequency of feature appearances
+17. `leaf_features`
+    - Identifies all leaf features in the model (features with no children).
+    - Input:
+      - `content` (string): UVL feature model content.
+    - Returns: A list of leaf feature names.
 
-#### 15. **Filter**
-- **Purpose**: Select configurations meeting specific criteria
-- **Use Case**: Narrowing down configuration space based on requirements
-- **Input**: UVL content + filter criteria
-- **Output**: Filtered subset of configurations
+18. `max_depth`
+    - Finds the maximum depth of the feature tree, indicating the longest path from root to leaf.
+    - Input:
+      - `content` (string): UVL feature model content.
+    - Returns: The maximum depth as an integer.
+
+19. `sampling`
+    - Generates a sample of valid configurations from the feature model.
+    - Input:
+      - `content` (string): UVL feature model content.
+    - Returns: A list of sample configurations.
+
+20. `satisfiability`
+    - Checks if the feature model is valid and can produce at least one valid configuration.
+    - Input:
+      - `content` (string): UVL feature model content.
+    - Returns: A boolean indicating if the model is satisfiable.
+
+21. `satisfiable_configuration`
+    - Checks if a given configuration is valid according to the model's constraints.
+    - Inputs:
+      - `content` (string): UVL feature model content.
+      - `config_file` (string): The configuration content to validate.
+    - Returns: A boolean indicating if the configuration is satisfiable.
+
+22. `unique_features`
+    - Identifies features that are part of a unique variability point.
+    - Input:
+      - `content` (string): UVL feature model content.
+    - Returns: A list of unique feature names.
+
+23. `variability`
+    - Calculates the ratio of variant features to the total number of features.
+    - Input:
+      - `content` (string): UVL feature model content.
+    - Returns: The variability ratio as a float.
+
+24. `variant_features`
+    - Identifies features that are neither core nor dead (i.e., truly optional).
+    - Input:
+      - `content` (string): UVL feature model content.
+    - Returns: A list of variant feature names.
+
+## Installation
+
+### Using uv (recommended)
+
+When using [`uv`](https://docs.astral.sh/uv/) no specific installation is needed. We will
+use [`uvx`](https://docs.astral.sh/uv/guides/tools/) to directly run *flamapy-mcp*.
+
+### Using PIP
+
+Alternatively you can install `flamapy-mcp` via pip:
+
+```
+pip install flamapy-mcp
+```
+
+After installation, you can run it as a script using:
+
+```
+python -m flamapy_mcp
+```
+
+## Configuration
+
+### Usage with Claude Desktop
+
+Add this to your `claude_desktop_config.json`:
+
+<details>
+<summary>Using uvx</summary>
+
+```json
+"mcpServers": {
+  "flamapy": {
+    "command": "uvx",
+    "args": ["flamapy-mcp"]
+  }
+}
+```
+</details>
+
+<details>
+<summary>Using pip installation</summary>
+
+```json
+"mcpServers": {
+  "flamapy": {
+    "command": "python",
+    "args": ["-m", "flamapy_mcp"]
+  }
+}
+```
+</details>
+
+### Usage with VS Code
+
+For quick installation, use one of the one-click install buttons below...
+
+[![Install with UV in VS Code](https://img.shields.io/badge/VS_Code-UV-0098FF?style=flat-square&logo=visualstudiocode&logoColor=white)](https://vscode.dev/redirect/mcp/install?name=flamapy&config=%7B%22command%22%3A%22uvx%22%2C%22args%22%3A%5B%22flamapy-mcp%22%5D%7D) [![Install with UV in VS Code Insiders](https://img.shields.io/badge/VS_Code_Insiders-UV-24bfa5?style=flat-square&logo=visualstudiocode&logoColor=white)](https://insiders.vscode.dev/redirect/mcp/install?name=flamapy&config=%7B%22command%22%3A%22uvx%22%2C%22args%22%3A%5B%22flamapy-mcp%22%5D%7D&quality=insiders)
+
+For manual installation, add the following JSON block to your User Settings (JSON) file in VS Code. You can do this by pressing `Ctrl + Shift + P` and typing `Preferences: Open Settings (JSON)`.
+
+Optionally, you can add it to a file called `.vscode/mcp.json` in your workspace. This will allow you to share the configuration with others.
+
+> Note that the `mcp` key is not needed in the `.vscode/mcp.json` file.
+
+```json
+{
+  "mcp": {
+    "servers": {
+      "flamapy": {
+        "command": "uvx",
+        "args": ["flamapy-mcp"]
+      }
+    }
+  }
+}
+```
+
+### Usage with [Zed](https://github.com/zed-industries/zed)
+
+Add to your Zed settings.json:
+
+<details>
+<summary>Using uvx</summary>
+
+```json
+"context_servers": [
+  "flamapy-mcp": {
+    "command": {
+      "path": "uvx",
+      "args": ["flamapy-mcp"]
+    }
+  }
+],
+```
+</details>
+
+<details>
+<summary>Using pip installation</summary>
+
+```json
+"context_servers": {
+  "flamapy-mcp": {
+    "command": {
+      "path": "python",
+      "args": ["-m", "flamapy_mcp"]
+    }
+  }
+},
+```
+</details>
+
+### Usage with [Zencoder](https://zencoder.ai)
+
+1. Go to the Zencoder menu (...)
+2. From the dropdown menu, select `Agent Tools`
+3. Click on the `Add Custom MCP`
+4. Add the name (i.e. flamapy) and server configuration from below, and make sure to hit the `Install` button
+
+<details>
+<summary>Using uvx</summary>
+
+```json
+{
+    "command": "uvx",
+    "args": ["flamapy-mcp"]
+}
+```
+</details>
+
+## Debugging
+
+You can use the MCP inspector to debug the server. For uvx installations:
+
+```
+npx @modelcontextprotocol/inspector uvx flamapy-mcp
+```
+
+Running `tail -n 20 -f ~/Library/Logs/Claude/mcp*.log` will show the logs from the server and may
+help you debug any issues.
+
+## Development
+
+If you are doing local development, you can test your changes using the MCP inspector. See [Debugging](#debugging) for run instructions.
+
+## License
+
+This MCP server is licensed under the MIT License. This means you are free to use, modify, and distribute the software, subject to the terms and conditions of the MIT License. For more details, please see the LICENSE file in the project repository.

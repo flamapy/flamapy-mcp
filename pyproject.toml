@@ -1,0 +1,14 @@
+[project]
+name = "flamapy-mcp"
+version = "0.1.0"
+description = "Flamapy MCP server to expose MCP tools to execute flamapy operations"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastmcp>=2.10.6",
+    "flamapy>=2.0.1",
+    "pydantic>=2.11.7",
+]
+
+[project.scripts]
+flamapy-mcp = "flamapy_mcp.__main__:mcp.run"
