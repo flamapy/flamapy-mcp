@@ -301,6 +301,10 @@ help you debug any issues.
 
 If you are doing local development, you can test your changes using the MCP inspector. See [Debugging](#debugging) for run instructions.
 
+## Collaborators
+
+Created in collaboration with the **Laboratorio de Bases de Datos** (Database Lab), [LBD](https://github.com/lbdudc).
+
 ## License
 
 This MCP server is licensed under the MIT License. This means you are free to use, modify, and distribute the software, subject to the terms and conditions of the MIT License. For more details, please see the LICENSE file in the project repository.
