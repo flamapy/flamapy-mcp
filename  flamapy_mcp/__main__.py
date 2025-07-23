@@ -20,6 +20,12 @@ class UVLContentWithConfig(BaseModel):
     config_file: str = Field(description="Configuration content or parameter (e.g., feature name, list of features).")
 
 
+class UVLContentWithSimpleConfig(BaseModel):
+    content: str = Field(description="UVL (universal variability language) feature model content")
+    selected_features: List[str] = Field(
+        description="A list of feature names to be considered 'selected' in the configuration.")
+
+
 mcp = FastMCP(
     name="UVL Analyzer",
     version="1.0.0",
@@ -55,15 +61,25 @@ def _run_facade_operation(content: str, operation_method: str, *args) -> Any:
         _cleanup_temp_file(temp_file)
 
 
-def _run_framework_operation(content: str, operation_name: str) -> Any:
-    """Run operation using the core framework interface"""
+def _run_framework_operation(content: str, operation_name: str, **kwargs) -> Any:
+    """Run operation using the core framework interface with optional parameters"""
     temp_file = _create_temp_file(content)
     try:
         dm = DiscoverMetamodels()
-        operation = dm.use_operation_from_file(operation_name, temp_file)
-        operation.execute()
-        result = operation.get_result()
-        return result
+        op = dm.use_operation_from_file(operation_name, temp_file)
+
+        # If operation requires execution
+        if hasattr(op, 'execute'):
+            # Set parameters if any were passed
+            for key, value in kwargs.items():
+                if hasattr(op, key):
+                    setattr(op, key, value)
+
+            op.execute()
+            return op.get_result()
+
+        # If result is already final
+        return op
     except Exception as e:
         raise Exception(f"Error executing {operation_name}: {str(e)}")
     finally:
@@ -99,8 +115,21 @@ def average_branching_factor(input: UVLContent) -> float:
 )
 def commonality(input: UVLContentWithConfig) -> float:
     try:
-        result = _run_facade_operation(input.content, "commonality", input.config_file)
-        return round(float(result), 2)
+        # Use the core framework to get the inclusion probabilities for ALL features.
+        all_probabilities = _run_framework_operation(input.content, "FeatureInclusionProbability")
+
+        # Get the specific feature name we are interested in from the input.
+        feature_name = input.config_file
+
+        # Look up the probability (commonality) for the requested feature.
+        feature_commonality = all_probabilities.get(feature_name)
+
+        # Check if the feature was found in the results. If not, it's an invalid name.
+        if feature_commonality is None:
+            raise ValueError(f"Feature '{feature_name}' not found in the model or has no commonality value.")
+
+        # The value is already a float (e.g., 0.75), so we can just round it.
+        return round(feature_commonality, 2)
     except Exception as e:
         raise Exception(f"Failed to compute commonality: {str(e)}")
 
@@ -111,7 +140,13 @@ def commonality(input: UVLContentWithConfig) -> float:
 )
 def configurations(input: UVLContent) -> List[Dict[str, bool]]:
     try:
-        return _run_facade_operation(input.content, "configurations")
+        configs_result = _run_facade_operation(input.content, "configurations")
+
+        serializable_configs = []
+        for config in configs_result:
+            if isinstance(config, Configuration):
+                serializable_configs.append(config.elements)
+        return serializable_configs
     except Exception as e:
         raise Exception(f"Failed to generate configurations: {str(e)}")
 
@@ -122,21 +157,10 @@ def configurations(input: UVLContent) -> List[Dict[str, bool]]:
 )
 def configurations_number(input: UVLContent) -> int:
     try:
-        result = _run_facade_operation(input.content, "count_configurations")
+        result = _run_framework_operation(input.content, "PySATConfigurationsNumber")
         return int(result)
     except Exception as e:
         raise Exception(f"Failed to count configurations: {str(e)}")
-
-
-@mcp.tool(
-    name="conflict_detection",
-    description="Identifies conflicting constraints in the feature model. Useful for debugging model consistency."
-)
-def conflict_detection(input: UVLContent) -> Any:
-    try:
-        return _run_framework_operation(input.content, "ConflictDetection")
-    except Exception as e:
-        raise Exception(f"Failed to detect conflicts: {str(e)}")
 
 
 @mcp.tool(
@@ -171,17 +195,6 @@ def dead_features(input: UVLContent) -> List[str]:
         return _run_facade_operation(input.content, "dead_features")
     except Exception as e:
         raise Exception(f"Failed to identify dead features: {str(e)}")
-
-
-@mcp.tool(
-    name="diagnosis",
-    description="Helps find explanations for an invalid configuration by identifying conflicting constraints."
-)
-def diagnosis(input: UVLContent) -> Any:
-    try:
-        return _run_framework_operation(input.content, "Diagnosis")
-    except Exception as e:
-        raise Exception(f"Failed to perform diagnosis: {str(e)}")
 
 
 @mcp.tool(
@@ -234,11 +247,16 @@ def feature_inclusion_probability(input: UVLContent) -> Dict[str, float]:
     name="filter",
     description="Filters and selects a subset of configurations based on specified criteria."
 )
-def filter_features(input: UVLContentWithConfig) -> Optional[List[Configuration]]:
+def filter_features(input: UVLContentWithConfig) -> List[List]:
+    config_file = None
     try:
-        return _run_facade_operation(input.content, "filter", input.config_file)
+        config_file = _create_temp_file(input.config_file, ".csvconf")
+        return _run_facade_operation(input.content, "filter", config_file)
     except Exception as e:
         raise Exception(f"Failed to filter features: {str(e)}")
+    finally:
+        if config_file:
+            _cleanup_temp_file(config_file)
 
 
 @mcp.tool(
@@ -276,6 +294,7 @@ def max_depth(input: UVLContent) -> int:
         raise Exception(f"Failed to compute max depth: {str(e)}")
 
 
+# TODO: FIX PROBLEM WHERE configs_result LIST IS EMPTY
 @mcp.tool(
     name="sampling",
     description="Generates a sample of valid configurations from the feature model."
@@ -284,6 +303,9 @@ def sampling(input: UVLContent) -> List[Dict[str, bool]]:
     try:
         return _run_framework_operation(input.content, "Sampling")
     except Exception as e:
+        # It's possible the model is invalid and has no configurations, which is not an error.
+        if "is a void feature model" in str(e):
+            return []  # Return an empty list if no configurations exist.
         raise Exception(f"Failed to generate samples: {str(e)}")
 
 
@@ -301,14 +323,22 @@ def satisfiability(input: UVLContent) -> bool:
 
 @mcp.tool(
     name="satisfiable_configuration",
-    description="Checks if a given configuration is valid according to the model's constraints."
+    description="Checks if a given configuration of selected features is valid according to the model's constraints."
 )
-def satisfiable_configuration(input: UVLContentWithConfig) -> bool:
+def satisfiable_configuration(input: UVLContentWithSimpleConfig) -> bool:
     config_temp_file_path = None
     try:
-        # Create a temporary file for the configuration content
-        config_temp_file_path = _create_temp_file(input.config_file, suffix=".config")
-        return _run_facade_operation(input.content, "satisfiable_configuration", config_temp_file_path)
+        config_lines = [f"{feature_name},True" for feature_name in input.selected_features]
+        config_content = "\n".join(config_lines)
+
+        # Create the temporary file with the correctly formatted configuration
+        config_temp_file_path = _create_temp_file(config_content, suffix=".csvconf")
+
+        # Run the operation using the facade, passing the required 'False' argument
+        result = _run_facade_operation(input.content, "satisfiable_configuration", config_temp_file_path, False)
+
+        return bool(result)
+
     except Exception as e:
         raise Exception(f"Failed to check configuration satisfiability: {str(e)}")
     finally:
@@ -322,7 +352,8 @@ def satisfiable_configuration(input: UVLContentWithConfig) -> bool:
 )
 def unique_features(input: UVLContent) -> List[str]:
     try:
-        return _run_facade_operation(input.content, "unique_features")
+        # Use the core framework with the correct operation name
+        return _run_framework_operation(input.content, "UniqueFeatures")
     except Exception as e:
         raise Exception(f"Failed to identify unique features: {str(e)}")
 
@@ -333,8 +364,12 @@ def unique_features(input: UVLContent) -> List[str]:
 )
 def variability(input: UVLContent) -> float:
     try:
-        result = _run_framework_operation(input.content, "Variability")
-        return round(float(result), 2)
+        result_tuple = _run_framework_operation(input.content, "Variability")
+
+        # We only need the first element, which is the variability ratio
+        variability_ratio = result_tuple[0]
+
+        return round(float(variability_ratio), 2)
     except Exception as e:
         raise Exception(f"Failed to compute variability: {str(e)}")
 
