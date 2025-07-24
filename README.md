@@ -197,6 +197,19 @@ Add this to your `claude_desktop_config.json`:
 ```
 </details>
 
+<details>
+<summary>Using docker</summary>
+
+```json
+"mcpServers": {
+  "git": {
+    "command": "docker",
+    "args": ["run", "--rm", "-i", "mcp/flamapy"]
+  }
+}
+```
+</details>
+
 ### Usage with VS Code
 
 For quick installation, use one of the one-click install buttons below...
