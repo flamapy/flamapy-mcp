@@ -8,153 +8,141 @@ Please note that flamapy-mcp is currently in early development. The functionalit
 
 ### Tools
 
-1. `atomic_sets`
-   - Identifies atomic sets, which are groups of features that always appear together in all valid configurations.
-   - Input:
-     - `content` (string): UVL (universal variability language) feature model content.
-   - Returns: A list of lists, where each inner list represents an atomic set of features.
+1.  `atomic_sets`
+    -   Identifies atomic sets, which are groups of features that always appear together in all valid configurations.
+    -   **Input:**
+        -   `content` (string): UVL (universal variability language) feature model content.
+    -   **Returns:** A list of lists, where each inner list represents an atomic set of features.
 
-2. `average_branching_factor`
-   - Calculates the average number of child features per parent feature, indicating model complexity.
-   - Input:
-     - `content` (string): UVL feature model content.
-   - Returns: The average branching factor as a floating-point number.
+2.  `average_branching_factor`
+    -   Calculates the average number of child features per parent feature, indicating model complexity.
+    -   **Input:**
+        -   `content` (string): UVL feature model content.
+    -   **Returns:** The average branching factor as a floating-point number.
 
-3. `commonality`
-   - Measures the frequency of a feature in valid configurations, expressed as a percentage.
-   - Inputs:
-     - `content` (string): UVL feature model content.
-     - `config_file` (string): The name of the feature to calculate commonality for.
-   - Returns: The commonality of the specified feature as a float.
+3.  `commonality`
+    -   Measures the frequency of a feature in valid configurations, expressed as a percentage.
+    -   **Inputs:**
+        -   `content` (string): UVL feature model content.
+        -   `config_file` (string): The name of the feature to calculate commonality for.
+    -   **Returns:** The commonality of the specified feature as a float.
 
-4. `configurations`
-   - Generates all possible valid configurations from the feature model.
-   - Input:
-     - `content` (string): UVL feature model content.
-   - Returns: A list of all valid configurations.
+4.  `configurations`
+    -   Generates all possible valid configurations from the feature model.
+    -   **Input:**
+        -   `content` (string): UVL feature model content.
+    -   **Returns:** A list of configurations, where each configuration is a dictionary of feature names to their boolean selection state (e.g., `[{'FeatureA': True, 'FeatureB': False}, ...]`).
 
-5. `configurations_number`
-   - Returns the total number of valid configurations for the feature model.
-   - Input:
-     - `content` (string): UVL feature model content.
-   - Returns: The total number of valid configurations as an integer.
+5.  `configurations_number`
+    -   Returns the total number of valid configurations for the feature model.
+    -   **Input:**
+        -   `content` (string): UVL feature model content.
+    -   **Returns:** The total number of valid configurations as an integer.
 
-6. `conflict_detection`
-   - Identifies conflicting constraints in the feature model. Useful for debugging model consistency.
-   - Input:
-     - `content` (string): UVL feature model content.
-   - Returns: Details about the conflicting constraints found.
+6.  `core_features`
+    -   Identifies features that are present in all valid configurations (mandatory features).
+    -   **Input:**
+        -   `content` (string): UVL feature model content.
+    -   **Returns:** A list of core feature names.
 
-7. `core_features`
-   - Identifies features that are present in all valid configurations (mandatory features).
-   - Input:
-     - `content` (string): UVL feature model content.
-   - Returns: A list of core feature names.
+7.  `count_leafs`
+    -   Counts the number of leaf features (features with no children) in the model.
+    -   **Input:**
+        -   `content` (string): UVL feature model content.
+    -   **Returns:** The number of leaf features as an integer.
 
-8. `count_leafs`
-   - Counts the number of leaf features (features with no children) in the model.
-   - Input:
-     - `content` (string): UVL feature model content.
-   - Returns: The number of leaf features as an integer.
+8.  `dead_features`
+    -   Identifies features that cannot be included in any valid configuration, often indicating model errors.
+    -   **Input:**
+        -   `content` (string): UVL feature model content.
+    -   **Returns:** A list of dead feature names.
 
-9. `dead_features`
-   - Identifies features that cannot be included in any valid configuration, often indicating model errors.
-   - Input:
-     - `content` (string): UVL feature model content.
-   - Returns: A list of dead feature names.
+9.  `estimated_number_of_configurations`
+    -   Estimates the total number of configurations by considering all feature combinations, ignoring constraints.
+    -   **Input:**
+        -   `content` (string): UVL feature model content.
+    -   **Returns:** The estimated number of configurations as an integer.
 
-10. `diagnosis`
-    - Helps find explanations for an invalid configuration by identifying conflicting constraints.
-    - Input:
-      - `content` (string): UVL feature model content.
-    - Returns: A diagnosis of the issues in the feature model.
+10. `false_optional_features`
+    -   Identifies features that seem optional but are mandatory due to model constraints.
+    -   **Input:**
+        -   `content` (string): UVL feature model content.
+    -   **Returns:** A list of false optional feature names.
 
-11. `estimated_number_of_configurations`
-    - Estimates the total number of configurations by considering all feature combinations, ignoring constraints.
-    - Input:
-      - `content` (string): UVL feature model content.
-    - Returns: The estimated number of configurations as an integer.
+11. `feature_ancestors`
+    -   Returns all ancestor features for a given feature in the model hierarchy.
+    -   **Inputs:**
+        -   `content` (string): UVL feature model content.
+        -   `config_file` (string): The feature name for which to find ancestors.
+    -   **Returns:** A list of ancestor feature names.
 
-12. `false_optional_features`
-    - Identifies features that seem optional but are mandatory due to model constraints.
-    - Input:
-      - `content` (string): UVL feature model content.
-    - Returns: A list of false optional feature names.
+12. `feature_inclusion_probability`
+    -   Calculates the probability of each feature being included in a random valid configuration.
+    -   **Input:**
+        -   `content` (string): UVL feature model content.
+    -   **Returns:** A dictionary mapping each feature to its inclusion probability (e.g., `{'FeatureA': 1.0, 'FeatureB': 0.5}`).
 
-13. `feature_ancestors`
-    - Returns all ancestor features for a given feature in the model hierarchy.
-    - Inputs:
-      - `content` (string): UVL feature model content.
-      - `config_file` (string): The feature name for which to find ancestors.
-    - Returns: A list of ancestor feature names.
+13. `filter`
+    -   Filters and selects a subset of configurations based on specified criteria.
+    -   **Inputs:**
+        -   `content` (string): UVL feature model content.
+        -   `config_file` (string): The filtering criteria, formatted as `.csvconf` content.
+    -   **Returns:** A list of configurations that match the criteria.
 
-14. `feature_inclusion_probability`
-    - Calculates the probability of each feature being included in a random valid configuration.
-    - Input:
-      - `content` (string): UVL feature model content.
-    - Returns: A dictionary mapping each feature to its inclusion probability.
+14. `homogeneity`
+    -   Measures the similarity of configurations. A higher value (closer to 1) indicates more similar configurations.
+    -   **Input:**
+        -   `content` (string): UVL feature model content.
+    -   **Returns:** The homogeneity score as a float.
 
-15. `filter`
-    - Filters and selects a subset of configurations based on specified criteria.
-    - Inputs:
-      - `content` (string): UVL feature model content.
-      - `config_file` (string): The filtering criteria.
-    - Returns: A list of configurations that match the criteria.
+15. `leaf_features`
+    -   Identifies all leaf features in the model (features with no children).
+    -   **Input:**
+        -   `content` (string): UVL feature model content.
+    -   **Returns:** A list of leaf feature names.
 
-16. `homogeneity`
-    - Measures the similarity of configurations. A higher value (closer to 1) indicates more similar configurations.
-    - Input:
-      - `content` (string): UVL feature model content.
-    - Returns: The homogeneity score as a float.
+16. `max_depth`
+    -   Finds the maximum depth of the feature tree, indicating the longest path from root to leaf.
+    -   **Input:**
+        -   `content` (string): UVL feature model content.
+    -   **Returns:** The maximum depth as an integer.
 
-17. `leaf_features`
-    - Identifies all leaf features in the model (features with no children).
-    - Input:
-      - `content` (string): UVL feature model content.
-    - Returns: A list of leaf feature names.
+17. `sampling`
+    -   Generates a sample of valid configurations from the feature model.
+    -   **Input:**
+        -   `content` (string): UVL feature model content.
+    -   **Returns:** A list of sample configurations, where each configuration is a dictionary of feature names to their boolean selection state.
 
-18. `max_depth`
-    - Finds the maximum depth of the feature tree, indicating the longest path from root to leaf.
-    - Input:
-      - `content` (string): UVL feature model content.
-    - Returns: The maximum depth as an integer.
+18. `satisfiability`
+    -   Checks if the feature model is valid and can produce at least one valid configuration.
+    -   **Input:**
+        -   `content` (string): UVL feature model content.
+    -   **Returns:** A boolean indicating if the model is satisfiable.
 
-19. `sampling`
-    - Generates a sample of valid configurations from the feature model.
-    - Input:
-      - `content` (string): UVL feature model content.
-    - Returns: A list of sample configurations.
+19. `satisfiable_configuration`
+    -   Checks if a given configuration of selected features is valid according to the model's constraints.
+    -   **Inputs:**
+        -   `content` (string): UVL feature model content.
+        -   `selected_features` (List[str]): A list of feature names to be considered 'selected' in the configuration.
+    -   **Returns:** A boolean indicating if the configuration is satisfiable.
 
-20. `satisfiability`
-    - Checks if the feature model is valid and can produce at least one valid configuration.
-    - Input:
-      - `content` (string): UVL feature model content.
-    - Returns: A boolean indicating if the model is satisfiable.
+20. `unique_features`
+    -   Identifies features that are part of a unique variability point.
+    -   **Input:**
+        -   `content` (string): UVL feature model content.
+    -   **Returns:** A list of unique feature names.
 
-21. `satisfiable_configuration`
-    - Checks if a given configuration is valid according to the model's constraints.
-    - Inputs:
-      - `content` (string): UVL feature model content.
-      - `config_file` (string): The configuration content to validate.
-    - Returns: A boolean indicating if the configuration is satisfiable.
+21. `variability`
+    -   Calculates the ratio of variant features to the total number of features.
+    -   **Input:**
+        -   `content` (string): UVL feature model content.
+    -   **Returns:** The variability ratio as a float.
 
-22. `unique_features`
-    - Identifies features that are part of a unique variability point.
-    - Input:
-      - `content` (string): UVL feature model content.
-    - Returns: A list of unique feature names.
-
-23. `variability`
-    - Calculates the ratio of variant features to the total number of features.
-    - Input:
-      - `content` (string): UVL feature model content.
-    - Returns: The variability ratio as a float.
-
-24. `variant_features`
-    - Identifies features that are neither core nor dead (i.e., truly optional).
-    - Input:
-      - `content` (string): UVL feature model content.
-    - Returns: A list of variant feature names.
+22. `variant_features`
+    -   Identifies features that are neither core nor dead (i.e., truly optional).
+    -   **Input:**
+        -   `content` (string): UVL feature model content.
+    -   **Returns:** A list of variant feature names.
 
 ## Installation
 
