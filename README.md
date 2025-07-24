@@ -202,7 +202,7 @@ Add this to your `claude_desktop_config.json`:
 
 ```json
 "mcpServers": {
-  "git": {
+  "flamapy-mcp": {
     "command": "docker",
     "args": ["run", "--rm", "-i", "mcp/flamapy"]
   }
